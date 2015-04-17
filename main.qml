@@ -5,18 +5,34 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Particles 2.0
 
 ApplicationWindow {
+    id: root
     title: qsTr("Hello World")
     width: 640
     height: 480
     visible: true
 
+    property int leftWins: 0
+    property int rightWins: 0
+
     Rectangle {
         id: leftpaddle
-        color: "red"
+        color: "blue"
         width: 20
         height: 80
         anchors.left: parent.left
         y: parent.height/2 - height/2
+
+        Affector {  // Top Edge
+            anchors.fill: parent
+            height: 5
+            system: ps
+
+            onAffectParticles: {
+                for (var i=0; i<particles.length; i++) {
+                    particles[i].vx *= -1;
+                }
+            }
+        }
     }
 
     Rectangle {
@@ -26,22 +42,36 @@ ApplicationWindow {
         height: 80
         anchors.right: parent.right
         y: parent.height/2 - height/2
+
+        Affector {  // Top Edge
+            anchors.fill: parent
+            anchors.rightMargin: parent.width-2
+            height: 5
+            system: ps
+
+            onAffectParticles: {
+                for (var i=0; i<particles.length; i++) {
+                    particles[i].vx *= -1;
+                }
+            }
+        }
     }
 
     Item {
         focus: true
+        property int delta: 40
         Keys.onPressed: {
             if (event.key === Qt.Key_W) {
-                leftpaddle.y = leftpaddle.y - 5
+                leftpaddle.y = leftpaddle.y - delta
             }
             if (event.key === Qt.Key_S) {
-                leftpaddle.y = leftpaddle.y + 5
+                leftpaddle.y = leftpaddle.y + delta
             }
             if (event.key === Qt.Key_I) {
-                rightpaddle.y = rightpaddle.y - 5
+                rightpaddle.y = rightpaddle.y - delta
             }
             if (event.key === Qt.Key_K) {
-                rightpaddle.y = rightpaddle.y + 5
+                rightpaddle.y = rightpaddle.y + delta
             }
         }
     }
@@ -49,29 +79,76 @@ ApplicationWindow {
     ParticleSystem {
         id: ps
     }
-    Gravity {
-        system: ps
-        magnitude: 32
-        angle: 0
-    }
     ItemParticle {
         system: ps
+        fade: false
         delegate: Rectangle {
             width: 30
             height: width
-            color: "pink"
+            color: "red"
             radius: width/2
         }
     }
     Emitter {
+        id: emitter
         system: ps
-        emitRate: 1
+        emitRate: 0
         anchors.centerIn: parent
-//        lifeSpan: Emitter.InfiniteLife
-        lifeSpan: 10000
+        lifeSpan: Emitter.InfiniteLife
         size: 64
-//        Component.onCompleted: {
-//            burst(10);
-//        }
+        velocity: AngleDirection {
+            angle: -45; magnitude: 200
+        }
+    }
+    Affector {  // Top Edge
+        anchors { left: parent.left; right: parent.right; top: parent.top }
+        height: 5
+        system: ps
+
+        onAffectParticles: {
+            for (var i=0; i<particles.length; i++) {
+                particles[i].vy *= -1;
+            }
+        }
+    }
+    Affector {  // Bottom Edge
+        anchors { left: parent.left; right: parent.right; bottom: parent.bottom }
+        height: 5
+        system: ps
+
+        onAffectParticles: {
+            for (var i=0; i<particles.length; i++) {
+                particles[i].vy *= -1;
+            }
+        }
+    }
+    Age {  // Left Edge
+        anchors { right: parent.left; bottom: parent.bottom; top: parent.top }
+        width: 5
+        system: ps
+        lifeLeft: 0
+        onAffected: root.rightWins++
+    }
+    Age {  // Right Edge
+        anchors { left: parent.right; bottom: parent.bottom; top: parent.top }
+        width: 5
+        system: ps
+        lifeLeft: 0
+        onAffected: root.leftWins++
+    }
+
+    Text {
+        anchors { left: parent.left; top: parent.top; margins: 10 }
+        text: "SCORE " + root.leftWins
+    }
+
+    Text {
+        anchors { right: parent.right; top: parent.top; margins: 10 }
+        text: "SCORE " + root.rightWins
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: emitter.burst(1)
     }
 }
