@@ -1,7 +1,6 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.3
 import QtQuick.Window 2.2
-import QtQuick.Dialogs 1.2
 import QtQuick.Particles 2.0
 
 ApplicationWindow {
@@ -17,8 +16,8 @@ ApplicationWindow {
     Rectangle {
         id: leftpaddle
         color: "blue"
-        width: 20
-        height: 80
+        width: 10
+        height: 100
         anchors.left: parent.left
         y: parent.height/2 - height/2
 
@@ -33,13 +32,15 @@ ApplicationWindow {
                 }
             }
         }
+
+        Behavior on y { NumberAnimation { duration: 100 } }
     }
 
     Rectangle {
         id: rightpaddle
         color: "green"
-        width: 20
-        height: 80
+        width: 10
+        height: 100
         anchors.right: parent.right
         y: parent.height/2 - height/2
 
@@ -55,6 +56,8 @@ ApplicationWindow {
                 }
             }
         }
+
+        Behavior on y { NumberAnimation { duration: 100 } }
     }
 
     Item {
@@ -85,7 +88,7 @@ ApplicationWindow {
         delegate: Rectangle {
             width: 30
             height: width
-            color: "red"
+            color: Qt.rgba(Math.random(), Math.random(), Math.random(), 1)
             radius: width/2
         }
     }
@@ -122,6 +125,7 @@ ApplicationWindow {
             }
         }
     }
+
     Age {  // Left Edge
         anchors { right: parent.left; bottom: parent.bottom; top: parent.top }
         width: 5
@@ -141,7 +145,6 @@ ApplicationWindow {
         anchors { left: parent.left; top: parent.top; margins: 10 }
         text: "SCORE " + root.leftWins
     }
-
     Text {
         anchors { right: parent.right; top: parent.top; margins: 10 }
         text: "SCORE " + root.rightWins
